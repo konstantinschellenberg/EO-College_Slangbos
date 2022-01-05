@@ -29,22 +29,27 @@ By introducting the R-based machine learning (ML) framework mlr³ (Lang et al. 2
 
 The endemic South African asteracea shrub *Seriphium plumosum L* (Slangbos) is increasingly invasive in grassvelds, with high dispersal rates in the provinces of Free State. Increasing woody cover and overgrazing in semi-arid ecosystems are known to be the major factors driving land degradation. Monitoring of the extent of shrubs are therefore essential for assessing landscape scale changes of the grassland biome and are key for management practises.
 
-<img src="images/SB1.png" alt="drawing" width="200"/>
+[//]: # (image1)
+<img src="images/SB1.png" alt="drawing" width="200" class="center"/>
 
 
-Avenant (2015)
+(Avenant, 2015)
 
 For the aerial perspective, shrubs clearly delineate from bare soil in the cold and dry winter months (Apr - September, left), while optical differences decrease in summer (October-March, right) 
 
-<img src="images/SB2.png" alt="drawing" width="200"/>
+[//]: # (image2)
+<img src="images/SB2.png" alt="drawing" width="500" class="center"/>
 
-NGI (2019)
+(NGI, 2019)
 
-Animation:
+___
 
-![](images/animation.gif)
+Rapid land cover change dynamics, September acquisitons (2016-2021) (PlanetScope RGB greyscaled):
 
-Based on PlanetScope imagery (Planet Team 2021-)
+[//]: # (animation)
+<img src="images/animation.gif" alt="drawing" width="500" class="center"/>
+
+(Altered PlanetScope Data, Planet Team 2021-)
 
 ## 2. MLR3 framework
 
@@ -66,7 +71,7 @@ Based on PlanetScope imagery (Planet Team 2021-)
 
 - Paul Avenant (2015): Report On The National Bankrupt Bush (Seriphium Plumosum) Survey (2010-2012). DOI: 10.13140/RG.2.2.27655.50088
 - National Geo-spatial Information (NGI) (2019). Data Portal. Accessed (12.12.2019), http://www.cdngiportal.co.za/cdngiportal/
-- Planet Team (2021-). 
+- Planet Team (2021-). PlanetScope Data. Accessed via https://www.planet.com/. Student Quota.
 
 
 (MLR3 framework)
