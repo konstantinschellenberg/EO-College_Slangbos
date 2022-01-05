@@ -30,15 +30,18 @@ By introducting the R-based machine learning (ML) framework mlr³ (Lang et al. 2
 The endemic South African asteracea shrub *Seriphium plumosum L* (Slangbos) is increasingly invasive in grassvelds, with high dispersal rates in the provinces of Free State. Increasing woody cover and overgrazing in semi-arid ecosystems are known to be the major factors driving land degradation. Monitoring of the extent of shrubs are therefore essential for assessing landscape scale changes of the grassland biome and are key for management practises.
 
 [//]: # (image1)
-<img src="images/SB1.png" alt="drawing" width="200" class="center"/>
-
+<p align="center">
+    <img src="images/SB1.png" alt="drawing" width="500"/>
+</p>
 
 (Avenant, 2015)
 
 For the aerial perspective, shrubs clearly delineate from bare soil in the cold and dry winter months (Apr - September, left), while optical differences decrease in summer (October-March, right) 
 
 [//]: # (image2)
-<img src="images/SB2.png" alt="drawing" width="500" class="center"/>
+<p align="center">
+    <img src="images/SB2.png" alt="drawing" width="500"/>
+</p>
 
 (NGI, 2019)
 
@@ -47,7 +50,9 @@ ___
 Rapid land cover change dynamics, September acquisitons (2016-2021) (PlanetScope RGB greyscaled):
 
 [//]: # (animation)
-<img src="images/animation.gif" alt="drawing" width="500" class="center"/>
+<p align="center">
+    <img src="images/animation.gif" alt="drawing" width="500"/>
+</p>
 
 (Altered PlanetScope Data, Planet Team 2021-)
 
@@ -60,6 +65,12 @@ Rapid land cover change dynamics, September acquisitons (2016-2021) (PlanetScope
 - Further reading, introduction and examples can be found in the [book project](https://mlr3book.mlr-org.com/introduction.html)
 
 ## 3. Hands-on Tutorial
+
+Software prerequisites:
+- R (4.1.2, released: 2021-11-01)
+- IDE (e.g. R-Studio, PyCharm)
+- QGIS (optional)
+- R-packages: `tidyverse`, `raster`, `sf`, `mlr3`, `mlr3spatiotempcv`, `mlr3learners`
 
 ## References
 
