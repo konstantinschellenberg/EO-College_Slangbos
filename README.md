@@ -39,9 +39,19 @@ For the aerial perspective, shrubs clearly delineate from bare soil in the cold 
 
 NGI (2019)
 
+Animation:
+
+![](images/animation.gif)
+
 ## 2. MLR3 framework
 
-Run example script from website
+- Basic knowledge of statistical programming are useful
+- Quick prototyping with one-liner code examples
+- Successor of [mlr](https://mlr.mlr-org.com/), mlr³ CRAN release July 2019.
+- [mlr3](https://mlr3.mlr-org.com/) repositorium
+- Further reading, introduction and examples can be found in the [book project](https://mlr3book.mlr-org.com/introduction.html)
+
+## 3. Hands-on Tutorial
 
 ## References
 
