@@ -33,6 +33,8 @@ The endemic South African asteracea shrub *Seriphium plumosum L* (Slangbos) is i
 
 Avenant (2015)
 
+For the aerial perspective, shrubs clearly delineate from bare soil in the cold and dry winter months (Apr - September, left), while optical differences decrease in summer (October-March, right) 
+
 ![](images/SB2.png)
 
 NGI (2019)
