@@ -8,6 +8,10 @@ Content by Konstantin Schellenberg, published [Here (freely available)](https://
 
 Data: Copernicus Sentinel Data (Sentinel-1 and Sentinel-2)
 
+## TODO
+
+- Animation smaller
+
 ## Introduction
 
 This tutorial aims to map the extent of Slangbos in highly dynamic open rangeland in vicinity to Thaba Nchu/Free State/SA by exploiting the dense ESA Copernicus Sentinel-1 (SAR, C-Band) and Sentinel-2 (multispectral) time series from 2015 to 2017.
@@ -91,6 +95,7 @@ Software prerequisites:
 - Meyer, Hanna, Christoph Reudenbach, Tomislav Hengl, Marwan Katurji, and Thomas Nauss. 2018. “Improving Performance of Spatio-Temporal Machine Learning Models Using Forward Feature Selection and Target-Oriented Validation.” Environmental Modelling & Software 101 (March): 1–9. https://doi.org/10.1016/j.envsoft.2017.12.001.
 - Valavi, Roozbeh, Jane Elith, Jose J. Lahoz-Monfort, and Gurutzeta Guillera-Arroita. 2018. “blockCV: an R package for generating spatially or environmentally separated folds for k-fold cross-validation of species distribution models.” bioRxiv, June. https://doi.org/10.1101/357798.
 - Zhao, Ying, and George Karypis. 2002. “Evaluation of Hierarchical Clustering Algorithms for Document Datasets.” 11th Conference of Information and Knowledge Management (CIKM), 515–24. http://glaros.dtc.umn.edu/gkhome/node/167.
+- Muenchow, J., Brenning, A., Richter, M., (2012). Geomorphic process rates of landslides along a humidity gradient in the tropical Andes. Geomorphology, 139-140: 271-284
 
 (Tutorial)
 
