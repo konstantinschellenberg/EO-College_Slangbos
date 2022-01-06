@@ -148,10 +148,16 @@ predict_and_save = function(task, model, outname){
 predict_and_save(model = model_RF, task = task_slangbos_sp, outname = "RF")
 predict_and_save(model = model_KNN, task = task_slangbos_sp, outname = "KNN")
 
-# predict on all the other years
 
-# ---------------------------------------
-# function for performing the same anaylsis on the other years
+# -----------------------------------
+# Automatise for all years (operational modelling)
+
+performance_estimation = function (){
+
+}
+
+performance_estimation()
+predict_and_save()
 
 # ---------------------------------------
 # MAPPING
