@@ -100,4 +100,5 @@ Software prerequisites:
 (Tutorial)
 
 - Copernicus Sentinel-1 & 2 data (2019). processed by ESA.
+- Hastie, T., R. Tibshirani und J. Friedman (2009). The Elements of Statistical Learning (2. Aufl.). New York: Springer.
 
