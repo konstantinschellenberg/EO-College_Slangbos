@@ -1,15 +1,17 @@
 #' Title     : Dry Ecosystems - Slangbos encroachment mapping in South Africa
+#' Subtitle  : Introduction to mlr³ as framework for modelling, assessing machine learning algorithms in the context of Earth Observation
 #' Project   : EO College
 #' Created by: Konstantin Schellenberg
+#' University of Jena, Institute for Geography, Department for Earth Observation
 #' Created on: 04.01.2022
 #' Created for: EO-College - Dry Ecosystems
-#' Scrip No. 0
+#' Scrip No. 0 - helper functions and paths
 
 # basic paths needed for the tutorial
 path = "./"
 path_data = file.path(path, "data")
 path_results = file.path(path, "data", "results")
-path_datacube = file.path(path, "data", "Cube")
+path_datacube = file.path(path, "data", "cube")
 
 ################################################################################
 # Coercing large rasters to data.tables ----------------------------------------

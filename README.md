@@ -10,7 +10,9 @@ Data: Copernicus Sentinel Data (Sentinel-1 and Sentinel-2)
 
 ## TODO
 
-- Animation smaller
+- Slideshow smaller
+- clean up 03
+- clean up package import
 
 ## Introduction
 
