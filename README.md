@@ -76,6 +76,10 @@ Software prerequisites:
 - QGIS (optional)
 - R-packages: `tidyverse`, `raster`, `sf`, `mlr3`, `mlr3spatiotempcv`, `mlr3learners`
 
+For participants not familiar with vectorisation in R we recommend taking courses on [R primers](hhttps://rstudio.cloud/learn/primers/), especially on [iteration](https://rstudio.cloud/learn/primers/5) with tidyverse.
+
+There are several cheat-sheets out there. Check out with one on [mlr³](https://cheatsheets.mlr-org.com/mlr3.pdf).
+
 ## References
 
 (General)
@@ -101,4 +105,5 @@ Software prerequisites:
 
 - Copernicus Sentinel-1 & 2 data (2019). processed by ESA.
 - Hastie, T., R. Tibshirani und J. Friedman (2009). The Elements of Statistical Learning (2. Aufl.). New York: Springer.
+- Brenning, Alexander. 2012. “Spatial cross-validation and bootstrap for the assessment of prediction rules in remote sensing: The R package sperrorest.” In 2012 IEEE International Geoscience and Remote Sensing Symposium. IEEE. https://doi.org/10.1109/igarss.2012.6352393.
 

@@ -1,4 +1,5 @@
-#' Title     : Modelling mit small subset for EO College
+#' Title     : Dry Ecosystems - Slangbos encroachment mapping in South Africa
+#' Project   : EO College
 #' Created by: Konstantin Schellenberg
 #' Created on: 04.01.2022
 #' Created for: EO-College - Dry Ecosystems
@@ -10,8 +11,16 @@ library(mlr3)               # mother package of the machine learning framework
 library(mlr3spatiotempcv)   # spatiotemporal resampling methods
 library(mlr3learners)       # additional classification and regression algorithms for mlr³
 library(exactextractr)      # fast pixel extraction (bypassing `raster`'s slow `extract` function)
-# library("mlr3viz")        # mlr³ specific visualisation
+library(mlr3viz)        # mlr³ specific visualisation
 library(kknn)               # Weighted k-Nearest Neighbor Classifier
+library(rasterVis)
+library(mlr3filters)
+
+# install.packages(c("patchwork", "ggtext", "ggsci", "blockCV"))
+# install.packages("mlr3filters")
+
+# setting a clean ggplot theme
+theme_set(theme_minimal())
 
 # load helper functions
 source("./R/_helpers.R")
@@ -24,7 +33,7 @@ path = "/home/c3urma/Projects/EO-College_Slangbos/"
 
 # basic paths needed for the tutorial
 path_data = file.path(path, "data")
-path_results = file.path(path, "results")
+path_results = file.path(path, "data", "results")
 path_datacube = file.path(path, "data", "Cube")
 
 # bulk create paths
@@ -45,10 +54,8 @@ ras = brick(ds)
 names(ras) = layername$layer
 
 # show data
-plot(ras[[1]])
-plot(ras[[23:26]])
-# rasterVis::levelplot(ras[[10]])
-# rasterVis::levelplot(ras[[25]])
+plot(ras[[1]], main = layername$layer[1])  # SAVI
+plot(ras[[23]], main = layername$layer[23]) # VH
 
 # ---------------------------------------
 # loading samples: Training/test set for classification
@@ -104,7 +111,7 @@ lc_binary = dplyr::select(lc_sf, -class)
 # Multiclass:
 lc_multiclass = dplyr::select(lc_sf, -slangbos)
 
-# ---------------------------------------
+# --------------------------------------- 1 -----------------------------------
 # TASK = type of aspired analysis, contain the backend data
 
 # NON SPATIAL
@@ -117,12 +124,13 @@ task_slangbos_nosp = TaskClassif$new(id = "Slangbos2015", backend = st_set_geome
 # Easy: Backend is `sf` object with point coordinates
 # Otherwise: for data.frame/data.table: extra_args = list(coordinate_names = c("x", "y"))
 task_slangbos_sp = TaskClassifST$new(id = "Slangbos2015", backend = lc_binary, target = "slangbos")
+# task_slangbos_sp = TaskClassifST$new(id = "Slangbos2015", backend = lc_multiclass, target = "class")
 
-# ---------------------------------------
+# --------------------------------------- 2 -----------------------------------
 # LEARNER = classification algorithm
 # Testing two different learners:
-# 1. Random Forest RF (package `ranger`)
-lnr_RF = lrn("classif.ranger", predict_type = "prob")
+# 1. Random Forest RF (package `ranger`), importance attribute only important for assessing feature importance (step 7)
+lnr_RF = lrn("classif.ranger", predict_type = "prob", importance = "permutation")
 
 # 2. K-nearst neighbor KNN (package `kknn`)
 lnr_KNN = lrn("classif.kknn", predict_type = "prob")
@@ -134,8 +142,7 @@ lnr_KNN = lrn("classif.kknn", predict_type = "prob")
 # Random Forest robust in terms of HP setting (source), (1) feasable.
 # Most other algorithms, yet, require HP optimisation. See https://mlr3book.mlr-org.com/optimization.html
 
-# -----------------------------------
-# HYPERPARAMETERS
+# --------------------------------------- 3 -----------------------------------
 # 1. Random Forest
 
 # mtry: size of split options for each tree
@@ -153,21 +160,21 @@ lnr_RF$param_set$values = list(importance = "impurity", num.trees = num.trees, m
 # k: Number of considered neighbors, arbitrary. Needs to be optimised (tuned) when used operationally
 lnr_KNN$param_set$values = list(k = 9)
 
-# -----------------------------------
-# TRAIN =
+# --------------------------------------- 4 -----------------------------------
+# TRAIN = fit a learner to all the available data, creates a MODEL
 
 # finally train model on all avaiable data
 model_RF = lnr_RF$train(task_slangbos_sp)
 model_KNN = lnr_KNN$train(task_slangbos_sp)
 
-# ---------------------------------------
-# PREDICT
+# --------------------------------------- 5 -----------------------------------
+# PREDICT = use a MODEL to predict on new data (i.e. a entire EO scene)
 
 # transform raster data to data.table, loads into memory.
 # CAUTION: very large rasters can hit the RAM limit, consider swap files.
 dt_ras = as.data.table.raster(ras, xy = TRUE)
 
-predict_and_save = function(task, model, newdata, outfile){
+predict_and_save = function(task, model, newdata, outfile, return=FALSE){
   # predict on the entire scene
   pred = model$predict_newdata(task = task, newdata = newdata) %>%
       as.data.table()
@@ -175,114 +182,97 @@ predict_and_save = function(task, model, newdata, outfile){
   # wrapper for writing out
   pred.geo = georeferencing(prediction = pred, pre_prediction = newdata, crs = 32735)
   writeRaster(pred.geo, filename = outfile, overwrite = TRUE)
+  if (isTRUE(return)) return(pred.geo)
 }
 
-outnameRF = "TestRF"
-outnameKNN = "TestKNN"
+outfileRF = file.path(path_results, sprintf("%s.tif", "TestRF"))
+outfileKNN = file.path(path_results, sprintf("%s.tif", "TestKNN"))
 
-predict_and_save(model = model_RF, task = task_slangbos_sp, newdata = dt_ras,
-                 outfile = file.path(path_results, sprintf("%s.tif", outnameRF)))
-predict_and_save(model = model_KNN, task = task_slangbos_sp, newdata = dt_ras,
-                 outfile = file.path(path_results, sprintf("%s.tif", outnameRF)))
+# RF
+predictionRF = predict_and_save(model = model_RF, task = task_slangbos_sp, newdata = dt_ras, outfile = outfileRF, return = TRUE)
 
+# KNN
+predictionKNN = predict_and_save(model = model_KNN, task = task_slangbos_sp, newdata = dt_ras, outfile = outfileKNN, return = TRUE)
 
 # -----------------------------------
-# VALIDATION = RESAMPLING internal training/test set patitition
+# VISUALISATION
+
+# inspect resulting layers
+# 1. rowid
+# 2. truth training variable (in the case of newdata prediction empty)
+# 3. binary/multiclass response variable
+# > 4. Probability of class membership for each class (here: binary TRUE/FALSE)
+
+plot(predictionRF)
+
+# binary response
+par(mfrow = c(1,2))   # show two plot side-on-side
+plot(predictionRF[[3]], main = "Random Forest classifier")
+plot(predictionKNN[[3]], main = "KNN classifier (k = 9)")
+# values: 1 = FALSE, 2 = TRUE
+
+# probability of class membership.
+plot(predictionRF[[5]], main = "Random Forest classifier")
+plot(predictionKNN[[5]], main = "KNN classifier (k = 9)")
+
+# --------------------------------------- 6 -----------------------------------
+# Feature Importance
+
+# create filter instance (permutation importance is a metric inherent to RF)
+filter = flt("importance", learner = lnr_RF)
+
+filter$calculate(task_slangbos_sp)
+filter_results = as.data.table(filter)
+autoplot(filter) + theme(axis.text.x = element_text(angle = 90, size = 10))
+
+# representation on the time dimension (add date and layer description)
+filter_results_date = filter_results %>%
+    dplyr::mutate(date = as.Date(str_extract(feature, "\\d{4}\\.\\d{2}.\\d{2}"), format = "%Y.%m.%d")) %>%
+    dplyr::mutate(layer = str_extract(feature, "^[a-z]{2,4}"))
+
+ggplot(filter_results_date, aes(date, score, fill = layer)) +
+    geom_bar(stat = "identity", width = 5)
+
+# interpret!
+# note that the importance is temporally correlated!
+
+# --------------------------------------- 7 -----------------------------------
+# VALIDATION = RESAMPLING internal training/test set patitition for assessing accuracy of the algorithm
 # In case of spatial data, the training/test sets need to be chosen in an spatially unbiased fashion to avoid spatial autocorrelation
 
-# spatial resampling
-resampling_RF1 = rsmp("repeated_spcv_coords", folds = 10, repeats = 10L)
-resampling_RF2 = rsmp("repeated_cv")
+# overview of resampling methods
+# as.data.table(mlr_resamplings)
 
-resampling_RF1$instantiate(task = task_slangbos_sp)
-resampling_RF2$instantiate(task = task_slangbos_sp)
-autoplot(resampling_RF1, task_slangbos_sp)
-autoplot(resampling_RF2, task_slangbos_sp)
+# spatial resampling
+# 1. RF
+resampling_RF_SpCV = rsmp("repeated_spcv_coords", folds = 10L, repeats = 10L)
+resampling_RF_SpCV$instantiate(task = task_slangbos_sp)
+autoplot(resampling_RF_SpCV, task_slangbos_sp)
+resampling_RF_SpCV$train_set(1)
+resampling_RF_SpCV$test_set(1)
+
+resampling_RF_CV = rsmp("repeated_cv", folds = 10, repeats = 10L)
+resampling_RF_CV$instantiate(task = task_slangbos_sp)
+autoplot(resampling_RF_CV, task_slangbos_sp)
+
+# 2. KNN
+resampling_KNN_SpCV = rsmp("repeated_spcv_coords", folds = 10L, repeats = 10L)
+resampling_KNN_SpCV$instantiate(task = task_slangbos_sp)
+autoplot(resampling_KNN_SpCV, task_slangbos_sp)
 
 # validation on spatial data splits in training and test sets
-rr1 = resample(task_slangbos_sp, lnr_RF, resampling_RF1, store_models = TRUE)
-rr2 = resample(task_slangbos_sp, lnr_RF, resampling_RF2, store_models = TRUE)
+# CAUTION: CAN TAKE LONGER! Adjust/reduce resampling parameters (folds, repeats according to your computer's ability)
+rr_RF_SpCV = resample(task_slangbos_sp, lnr_RF, resampling_RF_SpCV, store_models = TRUE)
+rr_RF_CV = resample(task_slangbos_sp, lnr_RF, resampling_RF_CV, store_models = TRUE)
+rr_KNN_SpCV = resample(task_slangbos_sp, lnr_RF, resampling_RF_CV, store_models = TRUE)
 
-rr1$aggregate(msr("classif.ce"))
-rr2$aggregate(msr("classif.ce"))
+# inspection of results (accuracy = 1-error), more measures like "area under ROC curve" or "classification error" available
+rr_RF_SpCV$aggregate(msr("classif.acc")) # (fairly) unbiased estimate (Brenning et al., 2012)
+rr_RF_SpCV$score()   # show result of single repetition
 
-# ---------------------------------------
-# MAPPING
-dss = list.files(path, pattern = "DataStack.*img$", full.names = TRUE)
+rr_RF_CV$aggregate(msr("classif.acc"))   # biased estimate, overestimation of accuracy
 
-
-# depr
-# pivoting data frame (colums "variables" of layers to rows "observations"
-# crs = "+proj=utm +zone=35 +south +datum=WGS84 +units=m +no_defs"
+rr_KNN_SpCV$aggregate(msr("classif.acc"))   # biased estimate, overestimation of accuracy
 
 # -----------------------------------
-#task_st = tsk("cookfarm")
-#resampling = rsmp("sptcv_cstf",
-#  folds = 5, time_var = "Date",
-#  space_var = "SOURCEID")
-#resampling$instantiate(task_st)
-#task_st$backend
-#
-#
-## spatiotemporal data cube
-## force long format
-#lc_long = lc_sf %>% pivot_longer(cols = matches("\\d{4}"), names_to = "Variable", values_to = "EO")
-## split variable into Layer (VH and SAVI) and Date
-#lc_long_split = lc_long %>% mutate(Layer = str_to_upper(str_match(Variable, "^[a-z]{2,}")),
-#                                   Date = str_match(Variable, "\\d{4}\\.\\d{2}\\.\\d{2}"))
-## coerce Date to internal `date` format
-#lc_long_split = lc_long_split %>% mutate(Date = as.character(as.Date(Date, format = "%Y.%m.%d")))
-## delete "mixed" variable column
-#lc_sptmp = dplyr::select(lc_long_split, -Variable)
-## EO Data to separate input columns
-#lc_sptmp_grouped = lc_sptmp %>%
-#    filter(Layer=="SAVI") %>%
-#    dplyr::select(-Layer, SAVI = EO, -class)
-#
-#task_slangbos_sptm = TaskClassifST$new(id = "SB_spatiotemp", backend = lc_sptmp_grouped,
-#                                       target = "slangbos")
-#resampling2 = rsmp("sptcv_cstf",
-#  folds = 5, time_var = "Date", space_var = "SAVI")
-#resampling2$instantiate(task_slangbos_sptm)
-#autoplot(resampling2, task_slangbos_sptm)
-#autoplot(resampling, task_st)
-#
-#pl = autoplot(resampling2, task_slangbos_sptm, c(1, 2, 3, 4),
-#  crs = 32735, point_size = 3, axis_label_fontsize = 10,
-#  plot3D = TRUE
-#)
-#
-## Warnings can be ignored
-#pl_subplot = plotly::subplot(pl)
-#
-#plotly::layout(pl_subplot,
-#  title = "Individual Folds",
-#  scene = list(
-#    domain = list(x = c(0, 0.5), y = c(0.5, 1)),
-#    aspectmode = "cube",
-#    camera = list(eye = list(z = 2.5))
-#  ),
-#  scene2 = list(
-#    domain = list(x = c(0.5, 1), y = c(0.5, 1)),
-#    aspectmode = "cube",
-#    camera = list(eye = list(z = 2.5))
-#  ),
-#  scene3 = list(
-#    domain = list(x = c(0, 0.5), y = c(0, 0.5)),
-#    aspectmode = "cube",
-#    camera = list(eye = list(z = 2.5))
-#  ),
-#  scene4 = list(
-#    domain = list(x = c(0.5, 1), y = c(0, 0.5)),
-#    aspectmode = "cube",
-#    camera = list(eye = list(z = 2.5))
-#  )
-#)
-#
-## -----------------------------------
-## failed because SAVI and VH were not taken on the same day, thus no harmonisation possible
-#
-#
-
-
-
+# --> next script 03_automatise to training/prediction on all years
