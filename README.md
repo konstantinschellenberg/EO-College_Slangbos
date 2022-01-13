@@ -74,7 +74,7 @@ Software prerequisites:
 - R (4.1.2, released: 2021-11-01)
 - IDE (e.g. R-Studio, PyCharm)
 - QGIS (optional)
-- R-packages: `tidyverse`, `raster`, `sf`, `mlr3`, `mlr3spatiotempcv`, `mlr3learners`
+- R-packages: `tidyverse`, `raster`, `sf`, `mlr3`, `mlr3spatiotempcv`, `mlr3learners`, etc. The full dependencies are introduced in the coarse.
 
 For participants not familiar with vectorisation in R we recommend taking courses on [R primers](hhttps://rstudio.cloud/learn/primers/), especially on [iteration](https://rstudio.cloud/learn/primers/5) with tidyverse.
 
@@ -89,6 +89,7 @@ The following animation is the final product of the coarse:
     <img src="images/Probability.gif" alt="drawing" width="500"/>
 </p>
 
+From the animation we can clearly see
 
 ## References
 
