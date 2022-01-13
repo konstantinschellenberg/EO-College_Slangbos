@@ -91,6 +91,11 @@ The following animation is the final product of the coarse:
 
 From the animation we can clearly see slangbos control happening in the southern part of the scene from 2015 to 2016. However, from 2016-2017 shrub sprawled quickly in the northwestern part, highlighting the very dynamic expansion of the species. 
 
+[//]: # (animation)
+<p align="center">
+    <img src="images/BinaryResponse.png" alt="drawing" width="500"/>
+</p>
+
 ## References
 
 (General)
