@@ -1,6 +1,9 @@
-# Title     : TODO
-# Created by: c3urma
-# Created on: 11.01.22
+#' Title     : Dry Ecosystems - Slangbos encroachment mapping in South Africa
+#' Project   : EO College
+#' Created by: Konstantin Schellenberg
+#' Created on: 04.01.2022
+#' Created for: EO-College - Dry Ecosystems
+#' Scrip No. 3
 
 # required packages for this tutorial:
 requirements = c("tidyverse", "raster", "sf", "mlr3", "mlr3spatiotempcv",
@@ -12,13 +15,8 @@ sapply(requirements, require, character=TRUE)
 # -----------------------------------
 # Automatise for all years (operational modelling)
 
-# basic paths needed for the tutorial
-path_data = file.path(path, "data")
-path_results = file.path(path, "data", "results")
-path_datacube = file.path(path, "data", "Cube")
-
-# -----------------------------------
 # Load data
+source("./R/_helpers.R")
 
 # load dataset of the first year (2015)
 rasters.in = list.files(path_datacube, pattern = "DataStack.*\\d{4}.*\\.img$", full.names = TRUE)
@@ -59,9 +57,6 @@ lc_sfs = map(rasters, function(r){
     lc_sf = sf::st_as_sf(lc_dfs, coords = c("x", "y"))
 })
 
-# example viz
-ggplot(lc_sf[[1]], aes(color = savi.2016.09.24)) + geom_sf()
-
 # Binary
 lc_binary = map(lc_sfs, ~ dplyr::select(.x, -class))
 map(lc_binary, ~ map_df(.x, ~ class(.x)))
@@ -70,11 +65,12 @@ map(lc_binary, ~ map_df(.x, ~ class(.x)))
 lc_multiclass = map(lc_sfs, ~ dplyr::select(.x, -slangbos))
 
 # -----------------------------------
-# stack = rasters[[1]]
-# trainingset = lc_binary[[1]]
-# learner_id="classif.ranger"; target_variable="slangbos"
-# crs = 32735
-# outfile = "/home/c3urma/Projects/EO-College_Slangbos/data/results/DataStackSubset2017Prediction"
+stack = rasters[[1]]
+trainingset = lc_binary[[1]]
+learner_id="classif.ranger"; target_variable="slangbos"
+crs = 32735
+outfile = "/home/c3urma/Projects/EO-College_Slangbos/data/results/DataStackSubset2017Prediction"
+hyperparameters = list(importance = "impurity",num.trees = 500)
 
 model_and_save = function(stack, trainingset, outfile, learner_id="classif.ranger", target_variable="slangbos",
                           hyperparameters, crs=32735){
@@ -89,6 +85,8 @@ model_and_save = function(stack, trainingset, outfile, learner_id="classif.range
 
     cat("\n# -------------------- HYPERPARAMETERS ------------------------")
     learner$param_set$values = hyperparameters
+    mtry = ceiling(sqrt(task$ncol))
+    learner$param_set$values[["mtry"]] = mtry
     print(as.data.table(learner$param_set$values))
     cat("... rest remains default")
 
@@ -102,26 +100,25 @@ model_and_save = function(stack, trainingset, outfile, learner_id="classif.range
     prediction = georeferencing(prediction = prediction_dt, pre_prediction = newdata, crs = crs)
 
     cat("\n# -------------------- SAVE ------------------------")
-    writeRaster(prediction, format = "GTiff", filename = paste(outfile, prop1, sep = "_"), overwrite = TRUE)
+    writeRaster(prediction, format = "GTiff", filename = paste(outfile, prop1, sep = "_"),
+                overwrite = TRUE)
     return(prediction)
 
 }
 
 old_files = str_split(rasters.in, "/|\\.")  # inherently vectorised function
 # create new file names by concatinating on the old
-new_fileendings = map(old_file, ~ paste(.x[length(.x) - 1], "Prediction", sep = ""))
+new_fileendings = map(old_files, ~ paste(.x[length(.x) - 1], "Prediction", sep = ""))
 # new complete file
 new_files = map(new_fileendings, ~ file.path(path_results, .x))
 
 # hyperparameters
-mtry = ceiling(sqrt(task$ncol))  # 6
 num.trees = 300
 
 # model one year
 prediction2015 = model_and_save(rasters[[1]], lc_binary[[1]], outfile = new_files[[1]],
                                 hyperparameters = list(importance = "impurity",
-                                                       num.trees = num.trees,
-                                                       mtry = mtry))
+                                                       num.trees = num.trees))
 
 # iterate over all
 predictions = pmap(list(rasters, lc_binary, new_files), function(raster, lc, name){
@@ -133,7 +130,7 @@ predictions = pmap(list(rasters, lc_binary, new_files), function(raster, lc, nam
     print(sprintf("Model prediction saved to: %s", name))
 })
 
-
+# -----------------------------------
 # Task:
 #' Run performance estimations for the shrub detection model for each year. Use pipeline introduced in
 #' the previous script 02_modelling as guideline. You can choose the performance measure you prefer

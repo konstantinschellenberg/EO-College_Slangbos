@@ -1,3 +1,16 @@
+#' Title     : Dry Ecosystems - Slangbos encroachment mapping in South Africa
+#' Project   : EO College
+#' Created by: Konstantin Schellenberg
+#' Created on: 04.01.2022
+#' Created for: EO-College - Dry Ecosystems
+#' Scrip No. 0
+
+# basic paths needed for the tutorial
+path = "./"
+path_data = file.path(path, "data")
+path_results = file.path(path, "data", "results")
+path_datacube = file.path(path, "data", "Cube")
+
 ################################################################################
 # Coercing large rasters to data.tables ----------------------------------------
 ################################################################################

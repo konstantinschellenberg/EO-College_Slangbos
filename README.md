@@ -80,6 +80,12 @@ For participants not familiar with vectorisation in R we recommend taking course
 
 There are several cheat-sheets out there. Check out with one on [mlr³](https://cheatsheets.mlr-org.com/mlr3.pdf).
 
+Goal of the coarse is to map bush encroachment from supervised remote sensing data using open source software only.
+
+The following animation is the final product of the coarse:
+
+![](images/Probability.gif)
+
 ## References
 
 (General)

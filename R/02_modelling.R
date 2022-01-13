@@ -3,6 +3,7 @@
 #' Created by: Konstantin Schellenberg
 #' Created on: 04.01.2022
 #' Created for: EO-College - Dry Ecosystems
+#' Scrip No. 2
 
 library(tidyverse)          # covenient data handling "verbs"
 library(raster)             # raster reading (binding to gdal)
@@ -22,11 +23,8 @@ library(mlr3filters)
 # setting a clean ggplot theme
 theme_set(theme_minimal())
 
-# load helper functions
-source("./R/_helpers.R")
-
-# main path (   ADJUST TO YOUR MACHINE  )
-path = "/home/c3urma/Projects/EO-College_Slangbos/"
+# main path (can be changed if the data is located not in the R project folder system)
+path = "./"
 
 # ---------------------------------------
 # PATHS
@@ -35,6 +33,8 @@ path = "/home/c3urma/Projects/EO-College_Slangbos/"
 path_data = file.path(path, "data")
 path_results = file.path(path, "data", "results")
 path_datacube = file.path(path, "data", "Cube")
+# the paths are also included in _helpers.R, so that their are loaded with this file is included:
+source("./R/_helpers.R")
 
 # bulk create paths
 walk(list(path_data, path_datacube, path_results), ~ dir.create(.x, recursive = TRUE))
