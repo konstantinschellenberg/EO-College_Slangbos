@@ -89,7 +89,7 @@ The following animation is the final product of the coarse:
     <img src="images/Probability.gif" alt="drawing" width="500"/>
 </p>
 
-From the animation we can clearly see
+From the animation we can clearly see slangbos control happening in the southern part of the scene from 2015 to 2016. However, from 2016-2017 shrub sprawled quickly in the northwestern part, highlighting the very dynamic expansion of the species. 
 
 ## References
 
