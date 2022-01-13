@@ -5,8 +5,7 @@
 
 # install main packages
 main_packages = c("tidyverse", "raster", "sf")
-mlr_packages = c("mlr3", "mlr3spatiotempcv", "mlr3learners")
-install.packages("GGally")
+mlr_packages = c("mlr3", "mlr3spatiotempcv", "mlr3learners", "mlr3filters", "mlr3viz")
 
 # (   UNCOMMENT TO INSTALL PACKAGES   )
 # install.packages(main_packages)
