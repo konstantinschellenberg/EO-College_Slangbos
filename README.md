@@ -84,7 +84,11 @@ Goal of the coarse is to map bush encroachment from supervised remote sensing da
 
 The following animation is the final product of the coarse:
 
-![](images/Probability.gif)
+[//]: # (animation)
+<p align="center">
+    <img src="images/Probability.gif" alt="drawing" width="500"/>
+</p>
+
 
 ## References
 
