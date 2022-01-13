@@ -17,7 +17,7 @@ sapply(packages, require, character=TRUE)
 # load all prediction products
 source("./R/_helpers.R")
 
-# load predictions
+# load predictionspath_results
 predictions = list.files(path_results, pattern = "Prediction.*\\.tif$", full.names = TRUE)
 rasters = map(predictions, ~ brick(.x))
 
@@ -58,15 +58,19 @@ names(prob) = namer
 plot(prob)
 writeRaster(prob, filename = file.path(path_results, "Probability"), format = "GTiff", overwrite = TRUE)
 
-# animate
+# visualisation
+# ggplot requires "long format", even from rasters
 prob_dt = as.data.table.raster(prob, xy = TRUE)
-prob_dt_pivot = prob_dt %>% pivot_longer(cols = -c(x, y), names_to = "Year", values_to = "Slangbos_Probability")
+prob_dt_pivot = prob_dt %>%
+    pivot_longer(cols = -c(x, y), names_to = "Year", values_to = "Slangbos_Probability")
 
+# quick representation of the change
 ggplot(prob_dt_pivot) +
     geom_raster(aes(x = x, y = y, fill = Slangbos_Probability)) +
     facet_grid(rows = vars(Year)) +
     scale_fill_gradient2(low = "blue", mid = "yellow", high = "red")
 
+# split dataset by years to plot independently
 prob_yearly = prob_dt_pivot %>% group_by(Year) %>%
     dplyr::group_split()
 
@@ -80,5 +84,10 @@ maps = map(prob_yearly, function(year){
 })
 print(maps)
 
+# export of maps (can be added to gifs using .g. `gganimate`, or via online tools)
 walk2(maps, namer, ~ ggsave(.x, filename = file.path(path_results, paste0(.y, ".png")), device = "png",
                      height = 5, width = 5))
+
+# -----------------------------------
+# thanks for following!
+# Cheers, Konstantin Schellenberg
