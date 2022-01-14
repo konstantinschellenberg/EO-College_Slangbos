@@ -69,9 +69,6 @@ as.data.table.raster <- function(x, row.names = NULL, optional = FALSE, xy=FALSE
 
 georeferencing = function(prediction, pre_prediction, crs){
 
-    #stopifnot(as.character(filepath))
-    # TODO: Error handling here with filepaths
-
     # bind coords on data.table
     out5 = cbind(prediction, x = pre_prediction$x, y = pre_prediction$y)
     #prediction[ , c("x", "y") := list(pre_prediction$x, pre_prediction$y)]
@@ -88,10 +85,8 @@ georeferencing = function(prediction, pre_prediction, crs){
     # gridding
     gridded(out3) = TRUE
 
-    outfile = stack(out3) %>%
-        trim()
+    # not efficient coersion chain
+    outfile = rast(stack(out3))
 
     return(outfile)
-    #writeRaster(outfile, filename = paste0(filepath, ".tif"),
-    #            format="GTiff", datatype='FLT4S', overwrite=TRUE, na.rm=TRUE)
 }

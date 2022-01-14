@@ -8,8 +8,8 @@
 #' Scrip No. 2
 
 # required packages for this tutorial:
-requirements = c("tidyverse", "raster", "sf", "mlr3", "mlr3spatiotempcv",
-                 "mlr3learners", "ranger", "exactextractr", "kknn")
+requirements = c("tidyverse", "terra", "sp", "sf", "mlr3", "mlr3spatiotempcv",
+                 "mlr3learners", "ranger", "exactextractr", "kknn", "mlr3spatial")
 
 # load en-block:
 sapply(requirements, require, character=TRUE)
@@ -27,7 +27,7 @@ layernames.in = list.files(path_datacube, pattern = "^Lay.*\\d{4}", full.names =
 # vectorise reading in
 layernames = map(layernames.in, ~ read_csv(.x))
 rasters = map2(rasters.in, layernames, function(x, y) {
-    ras = brick(x)
+    ras = rast(x)
     names(ras) = y$layer
     return(ras)
 })
@@ -36,12 +36,12 @@ rasters = map2(rasters.in, layernames, function(x, y) {
 length(rasters)
 
 # no. of bands in each dataset
-map_dbl(rasters, ~ raster::nbands(.x))
+#map_dbl(rasters, ~ terra::levels(.x))
 
 # no. of pixels in spatial dimensions and total no. of cells
-map_dbl(rasters, ~ raster::ncol(.x))
-map_dbl(rasters, ~ raster::nrow(.x))
-map_dbl(rasters, ~ raster::ncell(.x))
+#map_dbl(rasters, ~ raster::ncol(.x))
+#map_dbl(rasters, ~ raster::nrow(.x))
+#map_dbl(rasters, ~ raster::ncell(.x))
 
 # -----------------------------------
 # wrangle training/test samples
@@ -97,12 +97,12 @@ model_and_save = function(stack, trainingset, outfile, learner_id="classif.range
     print(learner$model)
 
     cat("\n# -------------------- PREDICT ------------------------")
-    newdata = as.data.table.raster(stack, xy = TRUE)
+    newdata = as.data.table(as.data.frame(stack, xy = TRUE))
     prediction_dt = model$predict_newdata(task = task, newdata = newdata) %>% as.data.table()
     prediction = georeferencing(prediction = prediction_dt, pre_prediction = newdata, crs = crs)
 
     cat("\n# -------------------- SAVE ------------------------")
-    writeRaster(prediction, format = "GTiff", filename = paste(outfile, prop1, sep = "_"),
+    terra::writeRaster(prediction, filename = paste(outfile, sprintf("%s.tif", prop1), sep = "_"), filetype = "GTiff",
                 overwrite = TRUE)
     return(prediction)
 
@@ -126,8 +126,7 @@ prediction2015 = model_and_save(rasters[[1]], lc_binary[[1]], outfile = new_file
 predictions = pmap(list(rasters, lc_binary, new_files), function(raster, lc, name){
     model_and_save(raster, lc, outfile = name,
                    hyperparameters = list(importance = "impurity",
-                                          num.trees = num.trees,
-                                          mtry = mtry)
+                                          num.trees = num.trees)
     )
     print(sprintf("Model prediction saved to: %s", name))
 })
