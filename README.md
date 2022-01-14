@@ -13,6 +13,7 @@ Data: Copernicus Sentinel Data (Sentinel-1 and Sentinel-2)
 - Slideshow smaller
 - clean up 03
 - clean up package import
+- Features.gpkg in git repo
 
 ## Introduction
 

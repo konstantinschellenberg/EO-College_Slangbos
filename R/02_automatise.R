@@ -25,7 +25,7 @@ rasters.in = list.files(path_datacube, pattern = "DataStack.*\\d{4}.*\\.img$", f
 layernames.in = list.files(path_datacube, pattern = "^Lay.*\\d{4}", full.names = TRUE)
 
 # vectorise reading in
-layernames = map(layernames.in, ~ read_csv(.x, show_col_types = FALSE))
+layernames = map(layernames.in, ~ read_csv(.x))
 rasters = map2(rasters.in, layernames, function(x, y) {
     ras = brick(x)
     names(ras) = y$layer
