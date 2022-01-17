@@ -67,26 +67,24 @@ as.data.table.raster <- function(x, row.names = NULL, optional = FALSE, xy=FALSE
 # for export of classification product
 ################################################################################
 
-georeferencing = function(prediction, pre_prediction, crs){
+georeferencing = function(prediction, vec_coords, crs){
 
     # bind coords on data.table
-    out5 = cbind(prediction, x = pre_prediction$x, y = pre_prediction$y)
-    #prediction[ , c("x", "y") := list(pre_prediction$x, pre_prediction$y)]
+    pred_coords = cbind(prediction, x = vec_coords$x, y = vec_coords$y)
+    vec = terra::vect(pred_coords, geom = c("x", "y"))
+    xmin = min(pred_coords$x)
+    xmax = max(pred_coords$x)
+    ymin = min(pred_coords$y)
+    ymax = max(pred_coords$y)
 
-    # make sf coords
-    out4 = st_as_sf(out5, coords = c("x", "y"))
+    r <- terra::rast(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, crs=sprintf("epsg:%s", crs), resolution=30)
+    vars = names(prediction)[3:length(names(prediction))]
+    rasterized = purrr::map(vars, function(var){
+        # print(var)
+        terra::rasterize(vec, r, field = var)
+    })
+    merge = terra::rast(rasterized)
+    names(merge) = vars
+    return(merge)
 
-    # set crs
-    st_crs(out4) = crs
-
-    # to sp for gridding, functionality is not yet found in sf... st_rasterize may work in `stars`
-    out3 = as(out4, "Spatial")
-
-    # gridding
-    gridded(out3) = TRUE
-
-    # not efficient coersion chain
-    outfile = rast(stack(out3))
-
-    return(outfile)
 }

@@ -7,7 +7,7 @@
 #' Created for: EO-College - Dry Ecosystems
 #' Scrip No. 3
 
-packages = c("tidyverse", "raster")
+packages = c("tidyverse", "raster", "terra")
 
 # load en-block:
 sapply(packages, require, character=TRUE)
@@ -21,48 +21,44 @@ source("./R/_helpers.R")
 
 # load predictionspath_results
 predictions = list.files(path_results, pattern = "Prediction.*\\.tif$", full.names = TRUE)
-rasters = map(predictions, ~ brick(.x))
+rasters = map(predictions, ~ rast(.x))
 
 # -----------------------------------
 # 1. Binary classification response
 
 # extract only layer 3 (response)
-resp = map(rasters, ~ .x[[3]]) %>% stack()
+resp = map(rasters, ~ .x[[3]]) %>% rast()
 names(resp) = c("2015", "2016", "2017")
 plot(resp)
 
+# writing out the simple binary responses
+terra::writeRaster(resp, filename = file.path(path_results, "Response.tif"), filetype = "GTiff", overwrite = TRUE)
+
 # now let's create indizes over time for a better understand of land cover turnover:
-# RECLASSIFY
-# val: 2 (TRUE) -> 1
-# val: 1 (FALSE) -> NA
-resp[resp == 1] = NA
-resp[resp == 2] = 1
-plot(resp)
-
-# write out
-writeRaster(resp, filename = file.path(path_results, "Response"), format = "GTiff", overwrite = TRUE)
-
-# create unique indizes
-added = stack(resp[[1]], resp[[2]] + 10, resp[[3]] + 100)
-aggregated = sum(added[[1]], added[[2]], added[[3]], na.rm = TRUE)
+# Create unique indizes. Automatically changes bool to integer. FALSE = 0, TRUE = 1.
+resp = resp + 0
+index = c(resp[[1]], resp[[2]] * 10, resp[[3]] * 100)
+aggregated = sum(index)
 plot(aggregated)
 
 # write out
-writeRaster(aggregated, filename = file.path(path_results, "BinaryResponseIndex"), format = "GTiff", overwrite = TRUE)
+terra::writeRaster(aggregated, filename = file.path(path_results, "BinaryResponseIndex.tif"),
+                   filetype = "GTiff", overwrite = TRUE)
 
 # -----------------------------------
 # 2. Classification probability
 
 # extract only layer 5 (positive probability for slangbos)
-prob = map(rasters, ~ .x[[5]]) %>% stack()
+prob = map(rasters, ~ .x[[2]]) %>% rast()
 namer = paste0("Slangbos", c("2015", "2016", "2017"))
 names(prob) = namer
 plot(prob)
-writeRaster(prob, filename = file.path(path_results, "Probability"), format = "GTiff", overwrite = TRUE)
 
+terra::writeRaster(prob, filename = file.path(path_results, "Probability"),
+                   filetype = "GTiff", overwrite = TRUE)
 # visualisation
 # ggplot requires "long format", even from rasters
-prob_dt = as.data.table.raster(prob, xy = TRUE)
+prob_dt = as.data.table(as.data.frame(prob, xy = TRUE))
 prob_dt_pivot = prob_dt %>%
     pivot_longer(cols = -c(x, y), names_to = "Year", values_to = "Slangbos_Probability")
 
@@ -91,5 +87,5 @@ walk2(maps, namer, ~ ggsave(.x, filename = file.path(path_results, paste0(.y, ".
                      height = 5, width = 5))
 
 # -----------------------------------
-# thanks for following!
+# Thanks for following!
 # Cheers, Konstantin Schellenberg

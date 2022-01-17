@@ -11,8 +11,6 @@ Data: Copernicus Sentinel Data (Sentinel-1 and Sentinel-2)
 ## TODO
 
 - Slideshow smaller
-- clean up 03
-- clean up package import
 - Features.gpkg in git repo
 
 ## Introduction
@@ -77,7 +75,7 @@ Software prerequisites:
 - R (4.1.2, released: 2021-11-01)
 - IDE (e.g. R-Studio, PyCharm)
 - QGIS (optional)
-- R-packages: `tidyverse`, `raster`, `sf`, `mlr3`, `mlr3spatiotempcv`, `mlr3learners`, etc. The full dependencies are introduced in the coarse.
+- R-packages: `tidyverse`, `data.table`, `terra`, `raster` (soon deprecated, replaced by `terra`, only used for visualisation), `sf`, `mlr3`, `mlr3spatiotempcv`, `mlr3learners`, `mlr3filters`, `mlr3viz`), etc. The full dependencies are introduced in the coarse.
 
 For participants not familiar with vectorisation in R we recommend taking courses on [R primers](hhttps://rstudio.cloud/learn/primers/), especially on [iteration](https://rstudio.cloud/learn/primers/5) with tidyverse.
 
@@ -110,6 +108,7 @@ From the animation we can clearly see slangbos control happening in the southern
 - Paul Avenant (2015): Report On The National Bankrupt Bush (Seriphium Plumosum) Survey (2010-2012). DOI: 10.13140/RG.2.2.27655.50088
 - National Geo-spatial Information (NGI) (2019). Data Portal. Accessed (12.12.2019), http://www.cdngiportal.co.za/cdngiportal/
 - Planet Team (2021-). PlanetScope Data. Accessed via https://www.planet.com/. Student Quota.
+- International Land Resources (Pty) Ltd. (2018). Automated Land Cover Classification South Africa; Report No: L06572/180618/1; Final Report—SSC WC 03(2017/2018) DRDLR; International Land Resources (Pty) Ltd.: Pietermaritzburg, South Africa
 
 
 (MLR3 framework)

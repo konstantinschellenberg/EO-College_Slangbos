@@ -9,34 +9,36 @@
 
 # -----------------------------------
 # install main packages
-main_packages = c("tidyverse", "raster", "sf", "data.table")
+main_packages = c("tidyverse", "terra", "sf", "data.table", "exactextractr", "kknn", "data.table")
 mlr_packages = c("mlr3", "mlr3spatiotempcv", "mlr3learners", "mlr3filters", "mlr3viz")
 
 # (   UNCOMMENT TO INSTALL PACKAGES   )
 # install.packages(main_packages)
 # install.packages(mlr_packages)
-
 # install.packages(c("patchwork", "ggtext", "ggsci", "blockCV"))
-# install.packages("mlr3filters")
 
 # loading packages
 all_loaded = sapply(c(main_packages, mlr_packages), require, character=TRUE, quietly=TRUE)
 
 # are all packages successfully installed and loaded?
 all(all_loaded)
-# -> must return TRUE
+# -> must return TRUE, then all requrired packages are loaded in the session
 
 # -----------------------------------
+# alternative loading packages
 library(tidyverse)          # covenient data handling "verbs"
-library(raster)             # raster reading (binding to gdal)
+# library(raster)             # raster reading (binding to gdal)
+library(terra)              # superceded `raster`. raster reading (binding to gdal)
 library(sf)                 # spatial vector handling, conplying with tidyvese
 library(mlr3)               # mother package of the machine learning framework
 library(mlr3spatiotempcv)   # spatiotemporal resampling methods
 library(mlr3learners)       # additional classification and regression algorithms for mlr³
-library(exactextractr)      # fast pixel extraction (bypassing `raster`'s slow `extract` function)
 library(mlr3viz)            # mlr³ specific visualisation
-library(kknn)               # Weighted k-Nearest Neighbor Classifier
 library(mlr3filters)        # layer importance estimation
+library(exactextractr)      # fast pixel extraction (bypassing `raster`'s slow `extract` function)
+
+library(kknn)               # Weighted k-Nearest Neighbor Classifier
+# library(ranger)           # not needing to load, is loaded with mlr3learners
 
 # setting a clean ggplot theme
 theme_set(theme_minimal())
@@ -67,7 +69,7 @@ layername = read_csv(layername.in)
 print(layername)
 
 # read in raster
-ras = brick(dataset.in)
+ras = rast(dataset.in)
 
 # assign layername to the raster bands (for convenience)
 names(ras) = layername$layer
@@ -86,8 +88,8 @@ lc = read_sf(file.path(path_data, "Features.gpkg"), layer = "samples")
 # Indexes and extracts each pixel overlapping the polygons in time and layer
 # `include_xy`: carry spatial information through the extraction process
 lc_dfs = exact_extract(ras, lc,
-                        include_cols = c("slangbos", "class"),
-                        include_xy = TRUE)
+                       include_cols = c("slangbos", "class"),
+                       include_xy = TRUE)
 
 # created a list of data.frames for each polygon
 length(lc_dfs) == nrow(lc)  # equals the rows (sample polygons) previous imported
@@ -189,53 +191,109 @@ model_KNN = lnr_KNN$train(task_slangbos_sp)
 # --------------------------------------- 5 -----------------------------------
 # PREDICT = use a MODEL to predict on new data (i.e. a entire EO scene)
 
+predict_and_save = function(task, model, newdata, outfile, crs=32735, return=FALSE){
+    #' task: mlr3 Task with data in backend
+    #' model: the fitted `learner` on the task.
+    #' newdata: raster data of the entire scene in data.table format (RS scene and coords as features). coords must
+    #'      be named `x` and `y`.
+    #' outfile: Prediction output file.
+    #' crs: coordinate reference system in EPSG
+    #' return: whether or not saving the prediction as R variable
+
+    # predict on the entire scene
+    pred = model$predict_newdata(task = task, newdata = newdata) %>% as.data.table()
+
+    # wrapper for writing out
+    coords = newdata[, .(x, y)]
+    pred.geo = georeferencing(prediction = pred, vec_coords = coords, crs = crs)
+
+    # change order
+    pred.geo.swap = c(pred.geo[[2]], pred.geo[[3]], pred.geo[[1]])
+
+    terra::writeRaster(pred.geo.swap, filename = outfile, filetype = "GTiff", overwrite = TRUE, datatype = "FLS4S")
+    if (isTRUE(return)) return(pred.geo)
+}
+
 # transform raster data to data.table, loads into memory.
 # CAUTION: very large rasters can hit the RAM limit, consider swap files.
-dt_ras = as.data.table.raster(ras, xy = TRUE)
-
-predict_and_save = function(task, model, newdata, outfile, return=FALSE){
-  # predict on the entire scene
-  pred = model$predict_newdata(task = task, newdata = newdata) %>%
-      as.data.table()
-
-  # wrapper for writing out
-  pred.geo = georeferencing(prediction = pred, pre_prediction = newdata, crs = 32735)
-  writeRaster(pred.geo, filename = outfile, overwrite = TRUE)
-  if (isTRUE(return)) return(pred.geo)
-}
+dt_ras = as.data.table(as.data.frame(ras, xy = TRUE))
 
 outfileRF = file.path(path_results, sprintf("%s.tif", "TestRF"))
 outfileKNN = file.path(path_results, sprintf("%s.tif", "TestKNN"))
 
 # RF
-predictionRF = predict_and_save(model = model_RF, task = task_slangbos_sp, newdata = dt_ras, outfile = outfileRF, return = TRUE)
+predictionRF = predict_and_save(model = model_RF, task = task_slangbos_sp,
+                                newdata = dt_ras, outfile = outfileRF, return = TRUE)
 
 # KNN
-predictionKNN = predict_and_save(model = model_KNN, task = task_slangbos_sp, newdata = dt_ras, outfile = outfileKNN, return = TRUE)
+predictionKNN = predict_and_save(model = model_KNN, task = task_slangbos_sp,
+                                 newdata = dt_ras, outfile = outfileKNN, return = TRUE)
 
 # -----------------------------------
 # VISUALISATION
 
 # inspect resulting layers
-# 1. rowid
-# 2. truth training variable (in the case of newdata prediction empty)
-# 3. binary/multiclass response variable
-# > 4. Probability of class membership for each class (here: binary TRUE/FALSE)
-
+# 1. binary/multiclass response variable
+# > 2. Probability of class membership for each class (here: binary TRUE/FALSE)
 plot(predictionRF)
 
 # binary response
 par(mfrow = c(1,2))   # show two plot side-on-side
-plot(predictionRF[[3]], main = "Random Forest classifier")
-plot(predictionKNN[[3]], main = "KNN classifier (k = 9)")
+plot(predictionRF[[1]], main = "Random Forest classifier")
+plot(predictionKNN[[1]], main = "KNN classifier (k = 9)")
 # values: 1 = FALSE, 2 = TRUE
 
 # probability of class membership.
-plot(predictionRF[[5]], main = "Random Forest classifier")
-plot(predictionKNN[[5]], main = "KNN classifier (k = 9)")
+plot(predictionRF[[3]], main = "Random Forest classifier")
+plot(predictionKNN[[3]], main = "KNN classifier (k = 9)")
 
 # --------------------------------------- 6 -----------------------------------
-# Feature Importance
+# VALIDATION = RESAMPLING internal training/test set patitition for assessing accuracy of the algorithm
+# In case of spatial data, the training/test sets need to be chosen in an spatially unbiased fashion to avoid spatial autocorrelation
+
+# overview of resampling methods
+as.data.table(mlr_resamplings)
+
+# spatial resampling
+# 1. RF
+# SPATIAL CROSSVALIDATION
+resampling_RF_SpCV = rsmp("repeated_spcv_coords", folds = 10L, repeats = 10L)
+resampling_RF_SpCV$instantiate(task = task_slangbos_sp)
+autoplot(resampling_RF_SpCV, task_slangbos_sp)
+
+# shows the test set that is holded out for independent model fit on the traing set only
+resampling_RF_SpCV$train_set(1)
+resampling_RF_SpCV$test_set(1)
+
+# CROSS-VALIDATION
+resampling_RF_CV = rsmp("repeated_cv", folds = 10, repeats = 10L)
+resampling_RF_CV$instantiate(task = task_slangbos_sp)
+autoplot(resampling_RF_CV, task_slangbos_sp)
+
+# +++++++++++
+# 2. KNN
+# SPATIAL CROSSVALIDATION
+resampling_KNN_SpCV = rsmp("repeated_spcv_coords", folds = 10L, repeats = 10L)
+resampling_KNN_SpCV$instantiate(task = task_slangbos_sp)
+
+# +++++++++++
+# validation on spatial data splits in training and test sets
+# CAUTION: CAN TAKE LONGER! Adjust/reduce resampling parameters (folds, repeats according to your computer's ability)
+rr_RF_SpCV = mlr3::resample(task_slangbos_sp, lnr_RF, resampling_RF_SpCV, store_models = TRUE)
+rr_RF_CV = mlr3::resample(task_slangbos_sp, lnr_RF, resampling_RF_CV, store_models = TRUE)
+rr_KNN_SpCV = mlr3::resample(task_slangbos_sp, lnr_RF, resampling_RF_CV, store_models = TRUE)
+
+# inspection of results (accuracy = 1-error), more measures like "area under ROC curve" or "classification error" available
+rr_RF_CV$aggregate(msr("classif.acc"))   # biased estimate, overestimation of accuracy
+
+rr_RF_SpCV$aggregate(msr("classif.acc")) # (fairly) unbiased estimate (Brenning et al., 2012)
+rr_RF_SpCV$score()[1:10]   # show result of the first 10 single repetition
+
+rr_KNN_SpCV$aggregate(msr("classif.acc"))   # biased estimate, overestimation of accuracy
+
+
+# --------------------------------------- 7 -----------------------------------
+# Feature Importance = Which layers have been imported for model fit?
 
 # create filter instance (permutation importance is a metric inherent to RF)
 filter = flt("importance", learner = lnr_RF)
@@ -254,45 +312,6 @@ ggplot(filter_results_date, aes(date, score, fill = layer)) +
 
 # interpret!
 # note that the importance is temporally correlated!
-
-# --------------------------------------- 7 -----------------------------------
-# VALIDATION = RESAMPLING internal training/test set patitition for assessing accuracy of the algorithm
-# In case of spatial data, the training/test sets need to be chosen in an spatially unbiased fashion to avoid spatial autocorrelation
-
-# overview of resampling methods
-# as.data.table(mlr_resamplings)
-
-# spatial resampling
-# 1. RF
-resampling_RF_SpCV = rsmp("repeated_spcv_coords", folds = 10L, repeats = 10L)
-resampling_RF_SpCV$instantiate(task = task_slangbos_sp)
-autoplot(resampling_RF_SpCV, task_slangbos_sp)
-
-# shows the test set that is holded out for independent model fit on the traing set only
-resampling_RF_SpCV$train_set(1)
-resampling_RF_SpCV$test_set(1)
-
-resampling_RF_CV = rsmp("repeated_cv", folds = 10, repeats = 10L)
-resampling_RF_CV$instantiate(task = task_slangbos_sp)
-autoplot(resampling_RF_CV, task_slangbos_sp)
-
-# 2. KNN
-resampling_KNN_SpCV = rsmp("repeated_spcv_coords", folds = 10L, repeats = 10L)
-resampling_KNN_SpCV$instantiate(task = task_slangbos_sp)
-
-# validation on spatial data splits in training and test sets
-# CAUTION: CAN TAKE LONGER! Adjust/reduce resampling parameters (folds, repeats according to your computer's ability)
-rr_RF_SpCV = resample(task_slangbos_sp, lnr_RF, resampling_RF_SpCV, store_models = TRUE)
-rr_RF_CV = resample(task_slangbos_sp, lnr_RF, resampling_RF_CV, store_models = TRUE)
-rr_KNN_SpCV = resample(task_slangbos_sp, lnr_RF, resampling_RF_CV, store_models = TRUE)
-
-# inspection of results (accuracy = 1-error), more measures like "area under ROC curve" or "classification error" available
-rr_RF_CV$aggregate(msr("classif.acc"))   # biased estimate, overestimation of accuracy
-
-rr_RF_SpCV$aggregate(msr("classif.acc")) # (fairly) unbiased estimate (Brenning et al., 2012)
-rr_RF_SpCV$score()[1:10]   # show result of the first 10 single repetition
-
-rr_KNN_SpCV$aggregate(msr("classif.acc"))   # biased estimate, overestimation of accuracy
 
 # -----------------------------------
 # --> next script 02_automatise to training/prediction on all years

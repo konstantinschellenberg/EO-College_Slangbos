@@ -9,7 +9,7 @@
 
 # required packages for this tutorial:
 requirements = c("tidyverse", "terra", "sp", "sf", "mlr3", "mlr3spatiotempcv",
-                 "mlr3learners", "ranger", "exactextractr", "kknn", "mlr3spatial")
+                 "mlr3learners", "ranger", "exactextractr", "kknn")
 
 # load en-block:
 sapply(requirements, require, character=TRUE)
@@ -67,12 +67,12 @@ map(lc_binary, ~ map_df(.x, ~ class(.x)))
 lc_multiclass = map(lc_sfs, ~ dplyr::select(.x, -slangbos))
 
 # -----------------------------------
-stack = rasters[[1]]
-trainingset = lc_binary[[1]]
-learner_id="classif.ranger"; target_variable="slangbos"
-crs = 32735
-outfile = "/home/c3urma/Projects/EO-College_Slangbos/data/results/DataStackSubset2017Prediction"
-hyperparameters = list(importance = "impurity",num.trees = 500)
+# stack = rasters[[1]]
+# trainingset = lc_binary[[1]]
+# learner_id="classif.ranger"; target_variable="slangbos"
+# crs = 32735
+# outfile = "/home/c3urma/Projects/EO-College_Slangbos/data/results/DataStackSubset2017Prediction"
+# hyperparameters = list(importance = "impurity",num.trees = 500)
 
 model_and_save = function(stack, trainingset, outfile, learner_id="classif.ranger", target_variable="slangbos",
                           hyperparameters, crs=32735){
@@ -98,13 +98,15 @@ model_and_save = function(stack, trainingset, outfile, learner_id="classif.range
 
     cat("\n# -------------------- PREDICT ------------------------")
     newdata = as.data.table(as.data.frame(stack, xy = TRUE))
+    coords = newdata[, .(x, y)]
     prediction_dt = model$predict_newdata(task = task, newdata = newdata) %>% as.data.table()
-    prediction = georeferencing(prediction = prediction_dt, pre_prediction = newdata, crs = crs)
+    prediction = georeferencing(prediction = prediction_dt, vec_coords = coords, crs = crs)
 
     cat("\n# -------------------- SAVE ------------------------")
-    terra::writeRaster(prediction, filename = paste(outfile, sprintf("%s.tif", prop1), sep = "_"), filetype = "GTiff",
+    prediction.swap = c(prediction[[2]], prediction[[3]], prediction[[1]])
+    terra::writeRaster(prediction.swap, filename = paste(outfile, sprintf("%s.tif", prop1), sep = "_"), filetype = "GTiff",
                 overwrite = TRUE)
-    return(prediction)
+    return(prediction.swap)
 
 }
 
@@ -129,8 +131,9 @@ predictions = pmap(list(rasters, lc_binary, new_files), function(raster, lc, nam
     return(pred)
 })
 
-walk(predictions, ~plot(.x))
-
+par(mfrow = c(2,2))
+# plotting response
+walk(predictions, ~plot(.x[[3]]))
 # -----------------------------------
 # Task:
 #' Run performance estimations for the shrub detection model for each year. Use pipeline introduced in
