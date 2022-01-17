@@ -7,7 +7,7 @@
 #' Created for: EO-College - Dry Ecosystems
 #' Scrip No. 3
 
-packages = c("tidyverse", "raster", "terra")
+packages = c("tidyverse", "terra")
 
 # load en-block:
 sapply(packages, require, character=TRUE)

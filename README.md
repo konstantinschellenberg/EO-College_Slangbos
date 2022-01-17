@@ -8,11 +8,6 @@ Content by Konstantin Schellenberg, published [Here (freely available)](https://
 
 Data: Copernicus Sentinel Data (Sentinel-1 and Sentinel-2)
 
-## TODO
-
-- Slideshow smaller
-- Features.gpkg in git repo
-
 ## Introduction
 
 This tutorial aims to map the extent of Slangbos in highly dynamic open rangeland in vicinity to Thaba Nchu/Free State/SA by exploiting the dense ESA Copernicus Sentinel-1 (SAR, C-Band) and Sentinel-2 (multispectral) time series from 2015 to 2017.
@@ -64,9 +59,17 @@ Rapid land cover change dynamics, September acquisitons (2016-2021) (PlanetScope
 ## 2. MLR3 framework
 
 - Basic knowledge of statistical programming are useful
+- Successor of mlr, mlr³ CRAN release July 2019.
 - Quick prototyping with one-liner code examples
-- Successor of [mlr](https://mlr.mlr-org.com/), mlr³ CRAN release July 2019.
+    - Framework for machine learning tasks
+    - Types: Classification, regression, survival analysis, …
+    - R software
+    - Interface to existing “learners”, e.g. random forest (`ranger`) or SVM (`e1071`)
+    - Tuning, feature selection, benchmarking, parallelisation
+
 - [mlr3](https://mlr3.mlr-org.com/) repositorium
+- [Basics](https://mlr3book.mlr-org.com/basics.html)
+- [Quick Start](https://mlr3book.mlr-org.com/index.html)
 - Further reading, introduction and examples can be found in the [book project](https://mlr3book.mlr-org.com/introduction.html)
 
 ## 3. Hands-on Tutorial
@@ -75,7 +78,7 @@ Software prerequisites:
 - R (4.1.2, released: 2021-11-01)
 - IDE (e.g. R-Studio, PyCharm)
 - QGIS (optional)
-- R-packages: `tidyverse`, `data.table`, `terra`, `raster` (soon deprecated, replaced by `terra`, only used for visualisation), `sf`, `mlr3`, `mlr3spatiotempcv`, `mlr3learners`, `mlr3filters`, `mlr3viz`), etc. The full dependencies are introduced in the coarse.
+- R-packages: `tidyverse`, `data.table`, `terra`, `sf`, `mlr3`, `mlr3spatiotempcv`, `mlr3learners`, `mlr3filters`, `mlr3viz`), etc. The full dependencies are introduced in the coarse.
 
 For participants not familiar with vectorisation in R we recommend taking courses on [R primers](hhttps://rstudio.cloud/learn/primers/), especially on [iteration](https://rstudio.cloud/learn/primers/5) with tidyverse.
 

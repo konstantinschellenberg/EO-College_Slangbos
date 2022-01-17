@@ -8,7 +8,7 @@
 #' Scrip No. 2
 
 # required packages for this tutorial:
-requirements = c("tidyverse", "terra", "sp", "sf", "mlr3", "mlr3spatiotempcv",
+requirements = c("tidyverse", "terra", "sf", "mlr3", "mlr3spatiotempcv",
                  "mlr3learners", "ranger", "exactextractr", "kknn")
 
 # load en-block:
@@ -143,6 +143,7 @@ walk(predictions, ~plot(.x[[3]]))
 
 # FUNCTION
 performance_estimation = function (){
+
 }
 
 # VECTORISATION
