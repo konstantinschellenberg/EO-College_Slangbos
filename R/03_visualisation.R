@@ -7,11 +7,13 @@
 #' Created for: EO-College - Dry Ecosystems
 #' Scrip No. 3
 
-packages = c("tidyverse", "raster", "gganimate")
-theme_set(theme_minimal())
+packages = c("tidyverse", "raster")
 
 # load en-block:
 sapply(packages, require, character=TRUE)
+
+# set ggplot theme
+theme_set(theme_minimal())
 
 # -----------------------------------
 # load all prediction products

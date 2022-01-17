@@ -119,17 +119,17 @@ num.trees = 300
 
 # model one year
 prediction2015 = model_and_save(rasters[[1]], lc_binary[[1]], outfile = new_files[[1]],
-                                hyperparameters = list(importance = "impurity",
-                                                       num.trees = num.trees))
+                                hyperparameters = list(importance = "impurity", num.trees = num.trees),
+                                learner_id="classif.ranger", target_variable="slangbos")
 
 # iterate over all
 predictions = pmap(list(rasters, lc_binary, new_files), function(raster, lc, name){
-    model_and_save(raster, lc, outfile = name,
-                   hyperparameters = list(importance = "impurity",
-                                          num.trees = num.trees)
-    )
+    pred = model_and_save(raster, lc, outfile = name, hyperparameters = list(importance = "impurity", num.trees = num.trees))
     print(sprintf("Model prediction saved to: %s", name))
+    return(pred)
 })
+
+walk(predictions, ~plot(.x))
 
 # -----------------------------------
 # Task:
