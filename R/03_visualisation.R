@@ -54,8 +54,9 @@ namer = paste0("Slangbos", c("2015", "2016", "2017"))
 names(prob) = namer
 plot(prob)
 
-terra::writeRaster(prob, filename = file.path(path_results, "Probability"),
+terra::writeRaster(prob, filename = file.path(path_results, "Probability.tif"),
                    filetype = "GTiff", overwrite = TRUE)
+
 # visualisation
 # ggplot requires "long format", even from rasters
 prob_dt = as.data.table(as.data.frame(prob, xy = TRUE))

@@ -9,25 +9,27 @@
 
 # -----------------------------------
 # install main packages
-main_packages = c("tidyverse", "terra", "sf", "data.table", "exactextractr", "kknn", "data.table")
-mlr_packages = c("mlr3", "mlr3spatiotempcv", "mlr3learners", "mlr3filters", "mlr3viz")
+main_packages = c("tidyverse", "terra", "sf", "data.table", "ranger", 
+                  "exactextractr", "kknn", "data.table")
+mlr_packages = c("mlr3", "mlr3spatiotempcv", "mlr3learners", 
+                 "mlr3filters", "mlr3viz")
+#install.packages(c("patchwork", "ggtext", "ggsci"))
 
 # (   UNCOMMENT TO INSTALL PACKAGES   )
-# install.packages(main_packages)
-# install.packages(mlr_packages)
-# install.packages(c("patchwork", "ggtext", "ggsci", "blockCV"))
+#install.packages(main_packages)
+#install.packages(mlr_packages)
 
 # loading packages
 all_loaded = sapply(c(main_packages, mlr_packages), require, character=TRUE, quietly=TRUE)
 
 # are all packages successfully installed and loaded?
 all(all_loaded)
-# -> must return TRUE, then all requrired packages are loaded in the session
+# -> must return TRUE, then all required packages are loaded in the session
 
 # -----------------------------------
 # alternative loading packages
 library(tidyverse)          # covenient data handling "verbs"
-# library(raster)             # raster reading (binding to gdal)
+# library(raster)           # raster reading (binding to gdal)
 library(terra)              # superceded `raster`. raster reading (binding to gdal)
 library(sf)                 # spatial vector handling, conplying with tidyvese
 library(mlr3)               # mother package of the machine learning framework
@@ -135,12 +137,6 @@ lc_multiclass = dplyr::select(lc_sf, -slangbos)
 # --------------------------------------- 1 -----------------------------------
 # TASK = type of aspired analysis, contain the backend data
 
-# NON SPATIAL
-# create a classification task instance, specifying the target variable (Landslide occurrence)
-task_slangbos_nosp = TaskClassif$new(id = "Slangbos2015", backend = st_set_geometry(lc_binary, NULL), target = "slangbos")
-# `TaskClassif` for all non-spatial analyses
-
-# SPATIAL
 # `TaskClassifST` is the SpatioTemporal version of classification tasks
 # Easy: Backend is `sf` object with point coordinates
 # Otherwise: for data.frame/data.table: extra_args = list(coordinate_names = c("x", "y"))
@@ -237,7 +233,7 @@ predictionKNN = predict_and_save(model = model_KNN, task = task_slangbos_sp,
 # > 2. Probability of class membership for each class (here: binary TRUE/FALSE)
 plot(predictionRF)
 
-# binary response
+ # binary response
 par(mfrow = c(1,2))   # show two plot side-on-side
 plot(predictionRF[[1]], main = "Random Forest classifier")
 plot(predictionKNN[[1]], main = "KNN classifier (k = 9)")
@@ -250,9 +246,6 @@ plot(predictionKNN[[3]], main = "KNN classifier (k = 9)")
 # --------------------------------------- 6 -----------------------------------
 # VALIDATION = RESAMPLING internal training/test set patitition for assessing accuracy of the algorithm
 # In case of spatial data, the training/test sets need to be chosen in an spatially unbiased fashion to avoid spatial autocorrelation
-
-# overview of resampling methods
-as.data.table(mlr_resamplings)
 
 # spatial resampling
 # 1. RF

@@ -139,7 +139,7 @@ walk(predictions, ~plot(.x[[3]]))
 #' Run performance estimations for the shrub detection model for each year. Use pipeline introduced in
 #' the previous script 02_modelling as guideline. You can choose the performance measure you prefer
 #' (e.g. permutation-based importance, classification accuracy/error, AUROC, OOB prediction error)
-#' Try writing the functions the can be access in a vectorsied way, e.g. for all years iteratively.
+#' Try writing the functions the can be access in a vectorised way, e.g. for all years iteratively.
 
 # FUNCTION
 performance_estimation = function (){
