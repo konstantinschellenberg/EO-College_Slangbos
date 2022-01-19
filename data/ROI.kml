@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document id="root_doc">
+<Schema name="ROI" id="ROI">
+	<SimpleField name="fid" type="float"></SimpleField>
+</Schema>
+<Folder><name>ROI</name>
+  <Placemark>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+	<ExtendedData><SchemaData schemaUrl="#ROI">
+		<SimpleData name="fid">1</SimpleData>
+	</SchemaData></ExtendedData>
+      <Polygon><outerBoundaryIs><LinearRing><coordinates>26.8921862364812,-29.434364260486 26.8922363108456,-29.3869051509351 26.94663579132,-29.3869380232765 26.9466109946226,-29.4343971962276 26.8921862364812,-29.434364260486</coordinates></LinearRing></outerBoundaryIs></Polygon>
+  </Placemark>
+  <Placemark>
+	<Style><LineStyle><color>ff0000ff</color></LineStyle><PolyStyle><fill>0</fill></PolyStyle></Style>
+	<ExtendedData><SchemaData schemaUrl="#ROI">
+		<SimpleData name="fid">2</SimpleData>
+	</SchemaData></ExtendedData>
+      <Polygon><outerBoundaryIs><LinearRing><coordinates>26.8921862364812,-29.434364260486 26.8922363108456,-29.3869051509351 26.94663579132,-29.3869380232765 26.9466109946226,-29.4343971962276 26.8921862364812,-29.434364260486</coordinates></LinearRing></outerBoundaryIs></Polygon>
+  </Placemark>
+</Folder>
+</Document></kml>
