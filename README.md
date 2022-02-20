@@ -2,12 +2,6 @@
 
 ### EO college repository regarding the analysis of bush encroachment pattern in the South African savanna.
 
-Date: 04.01.2021
-
-Content by Konstantin Schellenberg, published [Here (freely available)](https://www.mdpi.com/2072-4292/13/17/3342).
-
-Data: Copernicus Sentinel Data (Sentinel-1 and Sentinel-2)
-
 ## Introduction
 
 This tutorial aims to map the extent of Slangbos in highly dynamic open rangeland in vicinity to Thaba Nchu/Free State/SA by exploiting the dense ESA Copernicus Sentinel-1 (SAR, C-Band) and Sentinel-2 (multispectral) time series from 2015 to 2017.
@@ -101,6 +95,10 @@ From the animation we can clearly see slangbos control happening in the southern
 </p>
 
 ## References
+
+Content by Konstantin Schellenberg, published [Here (freely available)](https://www.mdpi.com/2072-4292/13/17/3342).
+
+Data: Copernicus Sentinel Data (Sentinel-1 and Sentinel-2)
 
 (General)
 
