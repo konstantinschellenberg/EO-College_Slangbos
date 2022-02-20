@@ -7,6 +7,17 @@
 #' Created for: EO-College - Dry Ecosystems
 #' Scrip No. 2
 
+#' Scope of the script
+#' __________________
+#' Here, the ML framework introduced in 01_modelling is automated to run spatial predicive modelling on all input years
+#' (2015, 2016, 2017) sequentially in order derive a time series of slangbos abundance in the study area. As to draw con-
+#' clusions about the performance of each of the three model setups, the user is opted to adapt performation assessment
+#' strategies learned in 01_modelling to all years' models. It is advised to use introduced R flow control (purrr::map) and
+#' R functions to iterate over all three model in order to increase knowledge and understanding of R's strong data
+#' analysis functionality.
+
+
+# -----------------------------------
 # required packages for this tutorial:
 requirements = c("tidyverse", "terra", "sf", "mlr3", "mlr3spatiotempcv",
                  "mlr3learners", "ranger", "exactextractr", "kknn")

@@ -7,13 +7,33 @@
 #' Created for: EO-College - Dry Ecosystems
 #' Scrip No. 1
 
+#' Scope of the script
+#' __________________
+#' This script introduces data pre-processing techniques to wragle multi-dimensional (lat, lon, time) remote sensing data
+#' to the mlr³ machine learning (ML) framework. Further, a simple (KNN) and an advanced (RandomForest) ML algorithm is
+#' used to model the spatial abundance of slangbos on the basis of field reference data. Unbiased assessment of spatial
+#' model performance is undertaken using spatial cross-validation (chunking the dataset spatially to training and testing).
+#' The RandomForest feature importance is used to determine the relative significance of a specific variable when accounting
+#' for the contribution of all other variables in the mode.
+#'
+
+# -----------------------------------
+# R VERSION USED FOR TUTORIAL:
+# R 4.1.2
+
+# YOUR R-VERSION
+cat(version$version.string)
+# (using other version than 4.1.2 can be unstable and may result in unexpected behaviour)
+
 # -----------------------------------
 # install main packages
 main_packages = c("tidyverse", "terra", "sf", "data.table", "ranger", 
                   "exactextractr", "kknn", "data.table")
 mlr_packages = c("mlr3", "mlr3spatiotempcv", "mlr3learners", 
                  "mlr3filters", "mlr3viz")
-#install.packages(c("patchwork", "ggtext", "ggsci"))
+
+# ancillary packages
+# install.packages(c("patchwork", "ggtext", "ggsci"))
 
 # (   UNCOMMENT TO INSTALL PACKAGES   )
 #install.packages(main_packages)
@@ -86,10 +106,16 @@ plot(ras[[23]], main = layername$layer[23]) # VH
 lc = read_sf(file.path(path_data, "Features.gpkg"), layer = "samples")
 # spatial feature `sf` object (inherent geospatial information: x, y)
 
+# remarks on crs: spatial vector and raster data must be projected in the same coordinate system!
+crs(ras) = sprintf("epsg:%s", st_crs(lc)$epsg)
+crs(ras, describe = TRUE)$code
+st_crs(lc)$epsg
+
+
 # creating training/test set.
 # Indexes and extracts each pixel overlapping the polygons in time and layer
 # `include_xy`: carry spatial information through the extraction process
-lc_dfs = exact_extract(ras, lc,
+lc_dfs = exactextractr::exact_extract(ras, lc,
                        include_cols = c("slangbos", "class"),
                        include_xy = TRUE)
 

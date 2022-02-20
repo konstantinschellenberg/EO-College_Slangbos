@@ -7,6 +7,14 @@
 #' Created for: EO-College - Dry Ecosystems
 #' Scrip No. 3
 
+#' Scope of the script
+#' __________________
+#' The two model of spatial predictions obtained in 02_automatise are extracted from the output and visualised. The
+#' binary response is transformed to an index to promote visualisation capabilities as RGB image e.g. using QGIS. The
+#' probability and response maps can then be used to assess shrub cover dynamics savanna ecosystems.
+
+
+# -----------------------------------
 packages = c("tidyverse", "terra")
 
 # load en-block:
