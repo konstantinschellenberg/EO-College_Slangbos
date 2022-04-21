@@ -1,6 +1,6 @@
 # Dry Ecosystems - Slangbos encroachment mapping in South Africa
 
-### EO college repository regarding the analysis of bush encroachment pattern in the South African savanna.
+### EO college repository regarding the analysis of bush encroachment pattern in the South African savanna as part of the [SALDi](https://www.saldi.uni-jena.de/en) project.
 
 ## Introduction
 
