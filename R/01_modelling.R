@@ -40,10 +40,10 @@ mlr_packages = c("mlr3", "mlr3learners",
 # install.packages(mlr_packages)
 
 # install mlr3 spatial backend lib from github (due to errors in CRAN version 2.0.1)
-remotes::install_github("mlr-org/mlr3spatiotempcv")
+# remotes::install_github("mlr-org/mlr3spatiotempcv")
 
 # loading packages
-all_loaded = sapply(c(main_packages, mlr_packages), require, character=TRUE, quietly=TRUE)
+all_loaded = sapply(c(main_packages, c(mlr_packages, "mlr3spatiotempcv")), require, character=TRUE, quietly=TRUE)
 
 # are all packages successfully installed and loaded?
 all(all_loaded)
