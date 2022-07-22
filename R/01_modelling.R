@@ -28,16 +28,19 @@ cat(version$version.string)
 # -----------------------------------
 # install main packages
 main_packages = c("tidyverse", "terra", "sf", "data.table", "ranger", 
-                  "exactextractr", "kknn", "data.table")
-mlr_packages = c("mlr3", "mlr3spatiotempcv", "mlr3learners", 
+                  "exactextractr", "kknn")
+mlr_packages = c("mlr3", "mlr3learners",
                  "mlr3filters", "mlr3viz")
 
 # ancillary packages
 # install.packages(c("patchwork", "ggtext", "ggsci"))
 
 # (   UNCOMMENT TO INSTALL PACKAGES   )
-#install.packages(main_packages)
-#install.packages(mlr_packages)
+# install.packages(main_packages)
+# install.packages(mlr_packages)
+
+# install mlr3 spatial backend lib from github (due to errors in CRAN version 2.0.1)
+remotes::install_github("mlr-org/mlr3spatiotempcv")
 
 # loading packages
 all_loaded = sapply(c(main_packages, mlr_packages), require, character=TRUE, quietly=TRUE)
@@ -167,7 +170,7 @@ lc_multiclass = dplyr::select(lc_sf, -slangbos)
 # Easy: Backend is `sf` object with point coordinates
 # Otherwise: for data.frame/data.table: extra_args = list(coordinate_names = c("x", "y"))
 task_slangbos_sp = TaskClassifST$new(id = "Slangbos2015", backend = lc_binary, target = "slangbos")
-# task_slangbos_sp = TaskClassifST$new(id = "Slangbos2015", backend = lc_multiclass, target = "class")
+task_slangbos_sp = TaskClassifST$new(id = "Slangbos2015", backend = lc_multiclass, target = "class")
 
 # --------------------------------------- 2 -----------------------------------
 # LEARNER = classification algorithm
@@ -275,7 +278,7 @@ plot(predictionKNN[[3]], main = "KNN classifier (k = 9)")
 
 # spatial resampling
 # 1. RF
-# SPATIAL CROSSVALIDATION
+# SPATIAL CROSS-VALIDATION
 resampling_RF_SpCV = rsmp("repeated_spcv_coords", folds = 10L, repeats = 10L)
 resampling_RF_SpCV$instantiate(task = task_slangbos_sp)
 autoplot(resampling_RF_SpCV, task_slangbos_sp)
@@ -300,7 +303,7 @@ resampling_KNN_SpCV$instantiate(task = task_slangbos_sp)
 # CAUTION: CAN TAKE LONGER! Adjust/reduce resampling parameters (folds, repeats according to your computer's ability)
 rr_RF_SpCV = mlr3::resample(task_slangbos_sp, lnr_RF, resampling_RF_SpCV, store_models = TRUE)
 rr_RF_CV = mlr3::resample(task_slangbos_sp, lnr_RF, resampling_RF_CV, store_models = TRUE)
-rr_KNN_SpCV = mlr3::resample(task_slangbos_sp, lnr_RF, resampling_RF_CV, store_models = TRUE)
+rr_KNN_SpCV = mlr3::resample(task_slangbos_sp, lnr_RF, resampling_KNN_SpCV, store_models = TRUE)
 
 # inspection of results (accuracy = 1-error), more measures like "area under ROC curve" or "classification error" available
 rr_RF_CV$aggregate(msr("classif.acc"))   # biased estimate, overestimation of accuracy
